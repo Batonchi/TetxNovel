@@ -3,6 +3,7 @@ from app.constant import *
 from app.database import get_connection
 
 
+# класс работающий с БД с таблицей items
 class ItemService:
 
     @staticmethod

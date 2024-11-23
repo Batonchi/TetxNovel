@@ -1,3 +1,6 @@
+# модель для обертки  данных из answers_texts и texts таблиц БД
+
+
 class Text:
 
     def __init__(self, id: int, content: str, degree_of_friendly: int, region_id: int, who_say: str = None):

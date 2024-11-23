@@ -1,6 +1,7 @@
 from app.players.model import Player
 from app.constant import *
 from app.database import get_connection
+# класс работающий с БД с таблицей items
 
 
 class PlayerService:
@@ -32,9 +33,22 @@ class PlayerService:
             , player_id).fetchone()
 
     @staticmethod
+    def get_player_by_name(player_name: str):
+        with get_connection(PATH) as conn:
+            return conn.cursor().execute(
+                f'''SELECT * FROM players''').fetchone()
+
+    @staticmethod
     def drop_player_by_id(player_id: int):
         with get_connection(PATH) as conn:
             conn.cursor().execute(
                 '''DELETE FROM players WHERE id = ?'''
             , player_id)
             conn.commit()
+
+    @staticmethod
+    def get_last_player_id():
+        with get_connection(PATH) as conn:
+            return conn.cursor().execute('''
+                SELECT id FROM players ORDER BY id DESC LIMIT 1
+            ''').fetchone()

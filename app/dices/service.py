@@ -2,6 +2,7 @@ from app.dices.model import Dice, Face
 from app.database import get_connection
 from app.constant import PATH
 from random import choices, randint
+# класс работающий с БД с таблицей dices
 
 
 class DiceService:

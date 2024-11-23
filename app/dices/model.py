@@ -30,4 +30,29 @@ class Face:
     def __str__(self):
         return self.description
 
+    def face_affect(self, creature):
+        desc = format_description(self.description)
+        prob = desc['reverse_action']
+        if desc['value'] >= 5 and 'ступень ада' in self.face_name:
+            if choice([True for _ in range(round(prob * 100))] + [Face for _ in range(1 - round(prob * 100))]):
+                creature.xp -= 20
+            else:
+                creature.atk += 5
+                creature.xp -= 5
+        elif desc['value'] < 5 and 'ступень ада' in self.face_name:
+
+            if choice([True for _ in range(round(prob * 100))] + [Face for _ in range(1 - round(prob * 100))]):
+                creature.atk -= 5
+            else:
+                creature.atk -= 1
+                creature.xp += 10
+        elif desc['value'] < 5 and 'сторона ада' in self.face_name:
+            if choice([True for _ in range(round(prob * 100))] + [Face for _ in range(1 - round(prob * 100))]):
+                creature.atk += 5
+            else:
+                creature.atk += 1
+                creature.xp += 7
+        elif desc['value'] >=5 and 'сторона ада' in self.face_name:
+            if choice([True for _ in range(round(prob * 100))]):
+                creature.xp -= 200
 

@@ -2,7 +2,7 @@ from app.texts.model import Text
 from app.database import get_connection
 from app.constant import *
 
-
+# работа с БД таблицами
 class TextService:
 
     @staticmethod

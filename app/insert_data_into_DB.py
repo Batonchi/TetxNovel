@@ -9,7 +9,7 @@ from app.gameSession.service import RegionService, Region
 from app.dices.service import FaceService, Face, DiceService, Dice
 
 
-# функция обрабатывает файл докс и запалняет БД данными
+# функция обрабатывает текстовый файл докс и запалняет БД данными
 def update_info(file_name: str):
     tables_insert = {
         'heroes': (ExistCreatureService.set_creature, ExistCreature),
