@@ -9,8 +9,8 @@ class DiceService:
     def set_dice(dice: Dice):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''INSERT INTO dices (name_of_dice, num_of_faces, description, faces) VALUES (%s, %s, %s, %s)'''
-            values = (dice.name_of_dice, dice.num_of_faces, dice.description, dice.faces)
+            query = '''INSERT INTO dices (id, name_of_dice, num_of_faces, description, faces) VALUES (?, ?, ?, ?, ?)'''
+            values = (dice.id, dice.name_of_dice, dice.num_of_faces, dice.description, dice.faces)
             cur.execute(query, values)
             conn.commit()
 
@@ -18,7 +18,7 @@ class DiceService:
     def get_dice_by_name(name: str):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''SELECT * FROM dices WHERE name_of_dice = %s'''
+            query = '''SELECT * FROM dices WHERE name_of_dice = ?'''
             value = name
             cur.execute(query, value)
             result = cur.fetchone()
@@ -29,7 +29,7 @@ class DiceService:
     def drop_dice(name: str):
         with get_connection() as conn:
             cur = conn.cursor()
-            query = '''DELETE FROM dices WHERE name_of_dice = %s'''
+            query = '''DELETE FROM dices WHERE name_of_dice = ?'''
             value = name
             cur.execute(query, value)
             conn.commit()
@@ -48,8 +48,8 @@ class FaceService:
     def set_face(face: Face):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''INSERT INTO faces (face_name, description) VALUES (%s, %s)'''
-            values = (face.face_name, face.description)
+            query = '''INSERT INTO faces (id, face_name, description) VALUES (?, ?, ?)'''
+            values = (face.id, face.face_name, face.description)
             cur.execute(query, values)
             conn.commit()
 
@@ -57,7 +57,7 @@ class FaceService:
     def get_face_by_name(name: str):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''SELECT * FROM faces WHERE name_of_face = %s'''
+            query = '''SELECT * FROM faces WHERE name_of_face = ?'''
             value = name
             cur.execute(query, value)
             result = cur.fetchone()
@@ -76,7 +76,7 @@ class FaceService:
     def drop_face(name: str):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''DELETE FROM faces WHERE name_of_face = %s'''
+            query = '''DELETE FROM faces WHERE name_of_face = ?'''
             value = name
             cur.execute(query, value)
             conn.commit()

@@ -1,8 +1,9 @@
 class Text:
 
-    def __init__(self, content: str, degree_of_friendly: int, region_id: int, id=None):
+    def __init__(self, id: int, content: str, degree_of_friendly: int, region_id: int, who_say: str = None):
         self.content = content
         self.degree_of_friendly = degree_of_friendly
         self.region_id = region_id
-        if id:
-            self.id = id
+        self.id = id
+        if who_say:
+            self.who_say = who_say

@@ -1,64 +1,44 @@
+from random import choice
+from app.dices.model import Dice
 
 
-
-class Skill:
-
-    def __init__(self, skill_name: str, type_of_skill: str, description: str, id=None):
-        self.skill_name = skill_name
-        self.type_of_skill = type_of_skill
-        self.description = description
-        if id:
-            self.id = id
-
-
-class Heal(Skill):
-    def __init__(self, skill_name: str, type_of_skill: str, description: str, heal_xp: int = 3, id=None):
-        super().__init__(skill_name, type_of_skill, description, id)
-        self.heal_xp = heal_xp
-
-    def heal_xp(self, creature):
-        creature.xp += self.heal_xp
+# как и сказано странная функция
+def stranger(xp: int, atk: int, prob: float, mul: float, drop: float):
+    mul += xp * atk - (prob * drop)
+    random_list = ([True for _ in range(round(drop * 100))]
+                   + [False for _ in range(1 - round(drop * 100))])
+    if choice(random_list):
+        mul += 1
+    return mul
 
 
-class OneShooter(Skill):
-    def __init__(self, skill_name: str, type_of_skill: str, description: str, atk: int=10, id=None):
-        super().__init__(skill_name, type_of_skill, description, id)
-        self.critDMG = atk
-
-    def return_crit_damage(self, creature):
-        pass
-
+# возврат атаки, с которой произойдет удар
+def crit_damage(atk: int, mul: float, prob: float):
+    if choice([True for _ in range(round(prob * 100))] + [True for _ in range(1 - round(prob * 100))]):
+        return atk * mul
+    else:
+        return atk * -1 * mul
 
 
-
-class FriendlyFire(Skill):
-    pass
-
-
-class BePrettyLittleDogBitch(Skill):
-    pass
-
-
-class Dodge(Skill):
-    pass
-
-class Stranger(Skill):
-    pass
-
-class PowerDamage(Skill):
-    pass
-
-class ReverseAction(Skill):
-    pass
+# Функция, которая возвращаеть возможность уклонения
+def dodge(dodge_probability, creature):
+    result = creature.dices[0].cast_dice()
+    if int(result.description['value']) >= 5:
+        dodge_probability *= 5
+    return choice([True for _ in range(round(dodge_probability * 100))] +
+                  [False for _ in range(round(100 - dodge_probability * 100))])
 
 
-class DecreaseDamageAEnemy(Skill):
-    pass
+# понижение урона проивника
+def decrease_enemy_damage(enemy, mul: float, prob: float):
+    if choice([True for _ in range(round(prob * 100))] +
+                  [False for _ in range(round(100 - prob * 100))]):
+        enemy.atk *= mul
 
 
-class TakeDamage(Skill):
-    pass
-
-
-class MakeDamage(Skill):
-    pass
+# Существо наносит вред себе функция для странных действий
+def self_harm(creature, mul: float, prob: float):
+    if choice([True for _ in range(round(prob * 100))] +
+                  [False for _ in range(round(100 - prob * 100))]):
+        creature.atk *= mul
+        creature.xp -= mul * creature.atk

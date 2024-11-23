@@ -13,4 +13,5 @@ PASSWORD = os.environ.get('PASSWORD')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = os.environ.get('ALGORITHM')
 PATH = ''
+
 PATH = "C:/Users/gkokg/PycharmProjects/TetxNovel/app/novel.db"
