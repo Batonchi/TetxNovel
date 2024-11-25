@@ -1,5 +1,3 @@
-from random import choice
-from app.formation import deforms, format_description
 from app.dices.model import *
 
 # В файле описаны модели таблиц из БД которые получаются и отправляются по запросу
@@ -7,17 +5,19 @@ from app.dices.model import *
 
 class Item:
 
-    def __init__(self, id: int, item_name: str, description: str, type_of_item: str):
+    def __init__(self, item_name: str, description: str, type_of_item: str, item_id: int = None):
         self.item_name = item_name
         self.description = description
         self.type_of_item = type_of_item
-        self.id = id
+        if item_id:
+            self.item_id = item_id
+
 
 # класс оружия, реализующего доп. урон
 class Weapon(Item):
 
-    def __init__(self, id: int, item_name: str, description: str, type_of_item: str):
-        super().__init__(id, item_name, description, type_of_item)
+    def __init__(self, item_name: str, description: str, type_of_item: str, item_id: int = None):
+        super().__init__(item_name, description, type_of_item, item_id)
         self.description = format_description(description)
         self.status = 'Not NULL'
 
@@ -36,8 +36,8 @@ class Weapon(Item):
 
 # класс странный, просто класс, п.с. здесь все придумано из пальца как и этот класс - полная анархия))
 class Stranger(Item):
-    def __init__(self, id: int, item_name: str, description: str, type_of_item: str):
-        super().__init__(id, item_name, description, type_of_item)
+    def __init__(self, item_name: str, description: str, type_of_item: str, item_id: int = None):
+        super().__init__(item_name, description, type_of_item, item_id)
         self.description = format_description(description)
         self.status = 'Not NULL'
 
@@ -55,10 +55,11 @@ class Stranger(Item):
         return {'xp': (atk + crit) * rev * effects['stranger'](xp, atk, prob, mul, self.description.get('drop', 0.3)),
                 'atk': ((atk + crit) * rev)}
 
+
 # класс еды - лечит, иногда калечит
 class Food(Item):
-    def __init__(self, id: int, item_name: str, description: str, type_of_item: str):
-        super().__init__(id, item_name, description, type_of_item)
+    def __init__(self, item_name: str, description: str, type_of_item: str, item_id: int = None):
+        super().__init__(item_name, description, type_of_item, item_id)
         self.description =format_description(description)
         self.status = 'Not NULL'
 

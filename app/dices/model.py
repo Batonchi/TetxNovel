@@ -1,12 +1,13 @@
 from random import choice
-from app.formation import deforms, format_description
+from formation import format_description
 # В файле описаны модели таблиц из БД которые получаются и отправляются по запросу
 
 
 class Dice:
 
-    def __init__(self, id: int, name_of_dice, num_of_faces: int, description: str, faces: str):
-        self.id = id
+    def __init__(self, name_of_dice, num_of_faces: int, description: str, faces: str, dice_id: int = None):
+        if dice_id:
+            self.dice_id = dice_id
         self.name_of_dice = name_of_dice
         self.num_of_faces = num_of_faces
         self.description = description
@@ -22,8 +23,9 @@ class Dice:
 
 class Face:
 
-    def __init__(self, id: int, face_name: str, description: str):
-        self.id = id
+    def __init__(self, face_name: str, description: str, face_id: int = None):
+        if face_id:
+            self.face_id = face_id
         self.face_name = face_name
         self.description = description
 

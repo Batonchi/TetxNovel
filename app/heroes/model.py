@@ -5,14 +5,16 @@ from app.dices.model import *
 
 class ExistCreature:
 
-    def __init__(self, id: int, hero_name: str, history: str, friendly_degree: int, items: str, xp: int, atk: int):
+    def __init__(self, hero_name: str, history: str, friendly_degree: int, items: str, xp: int, atk: int,
+                 hero_id: int = None):
         self.hero_name = hero_name
         self.history = history
         self.friendly_degree = friendly_degree
         self.items = items
         self.xp = xp
         self.atk = atk
-        self.id = id
+        if hero_id:
+            self.hero_id = hero_id
 
     def use_item(self, item, enemy):
         use = item.do_action_move()

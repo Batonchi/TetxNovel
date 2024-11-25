@@ -1,6 +1,6 @@
 from app.dices.model import Dice, Face
-from app.database import get_connection
-from app.constant import PATH
+from database import get_connection
+from constant import PATH
 from random import choices, randint
 # класс работающий с БД с таблицей dices
 
@@ -10,8 +10,8 @@ class DiceService:
     def set_dice(dice: Dice):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''INSERT INTO dices (id, name_of_dice, num_of_faces, description, faces) VALUES (?, ?, ?, ?, ?)'''
-            values = (dice.id, dice.name_of_dice, dice.num_of_faces, dice.description, dice.faces)
+            query = '''INSERT INTO dices (name_of_dice, num_of_faces, description, faces) VALUES (?, ?, ?, ?)'''
+            values = (dice.name_of_dice, dice.num_of_faces, dice.description, dice.faces)
             cur.execute(query, values)
             conn.commit()
 
@@ -49,8 +49,8 @@ class FaceService:
     def set_face(face: Face):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = '''INSERT INTO faces (id, face_name, description) VALUES (?, ?, ?)'''
-            values = (face.id, face.face_name, face.description)
+            query = '''INSERT INTO faces (face_name, description) VALUES (?, ?)'''
+            values = (face.face_name, face.description)
             cur.execute(query, values)
             conn.commit()
 
@@ -62,7 +62,7 @@ class FaceService:
             value = name
             cur.execute(query, value)
             result = cur.fetchone()
-            return result
+            return Face(result[1], result[2], result[0])
 
     @staticmethod
     def get_faces():
@@ -71,7 +71,7 @@ class FaceService:
             query = '''SELECT * FROM faces'''
             cur.execute(query)
             result = cur.fetchall()
-            return result
+            return [Face(el[1], el[2], el[0]) for el in result]
 
     @staticmethod
     def drop_face(name: str):

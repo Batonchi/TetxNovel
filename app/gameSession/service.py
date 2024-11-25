@@ -1,6 +1,6 @@
 from app.gameSession.model import Session, Region
-from app.database import get_connection
-from app.constant import *
+from database import get_connection
+from constant import *
 # классы для работы с БД и  функция генерации карты мира
 
 
@@ -19,9 +19,8 @@ class RegionService:
     def set_region(region: Region):
         with get_connection(PATH) as conn:
             cur = conn.cursor()
-            query = (f'INSERT INTO regions'
-                     f' (id, region_name, hero_placed, maybe_items) VALUES (?, ?, ?, ?)')
-            values = (region.id, region.region_name, region.hero_placed, region.maybe_items)
+            query = '''INSERT INTO regions (region_name, hero_placed, maybe_items) VALUES (?, ?, ?)'''
+            values = (region.region_name, region.hero_placed, region.maybe_items)
             cur.execute(query, values)
             conn.commit()
 
@@ -31,7 +30,8 @@ class RegionService:
             cur = conn.cursor()
             query = f'SELECT * FROM regions WHERE name = {region_name}'
             cur.execute(query)
-            return cur.fetcone()
+            result = cur.fetcone()
+            return Region(result[1], result[2], result[3], result[0])
 
 
 class SessionService:
@@ -39,16 +39,15 @@ class SessionService:
     @staticmethod
     def set_session(session: Session):
         with get_connection(PATH) as conn:
-            values = (session.id, session.player_id, session.checkpoint,
-                      session.player_puppet)
-            conn.cursor().execute(f'INSERT INTO sessions '
-                                  f'(id, player_id, checkpoint, player_puppet)'
-                                  f' VALUES (?, ?, ?, ?)', values)
+            values = (session.player_id, session.checkpoint, session.player_puppet)
+            conn.cursor().execute(f'INSERT INTO sessions (player_id, checkpoint, player_puppet) VALUES (?, ?, ?)',
+                                  values)
 
     @staticmethod
     def get_session_by_player_id(player_id: int):
         with get_connection(PATH) as conn:
-            return conn.cursor().execute(f'SELECT * FROM sessions WHERE player_id = {player_id}').fetchone()
+            result = conn.cursor().execute(f'SELECT * FROM sessions WHERE player_id = {player_id}').fetchone()
+            return Session(result[1], result[2], result[3], result[0])
 
     @staticmethod
     def get_last_session_id():
