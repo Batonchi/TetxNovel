@@ -3,7 +3,7 @@ from constant import *
 from database import get_connection
 
 
-# класс работающий с БД с таблицей items
+# буквально функция проверки типов
 def check_type_item(item: list):
     if item[3] == 'weapon':
         return Weapon(item[1], item[2], item[3], item[0])
@@ -14,11 +14,12 @@ def check_type_item(item: list):
     return Item(item[1], item[2], item[3], item[0])
 
 
+# класс работающий с БД с таблицей items
 class ItemService:
 
+    # функция для работы с изменением данных в таблице
     @staticmethod
     def set_item(item: Item):
-        print('hi')
         with get_connection(PATH) as conn:
             print(PATH)
             conn.cursor().execute('''
@@ -26,18 +27,21 @@ class ItemService:
             ''', (item.item_name, item.description, item.type_of_item))
             conn.commit()
 
+    # функция для работы с получением по имени данных в таблице
     @staticmethod
     def get_item_by_name(name: str):
         with get_connection(PATH) as conn:
             result = conn.cursor().execute('''SELECT * FROM items WHERE name = ?''', name).fetchone()
             return check_type_item(result)
 
+    # функция для работы с получением всех данных в таблице
     @staticmethod
     def get_all_items():
         with get_connection(PATH) as conn:
             result = conn.cursor().execute('''SELECT * FROM items''').fetchall()
             return [check_type_item(el) for el in result]
 
+    # # функция для работы с удалением данных в таблице
     @staticmethod
     def drop_item_by_name(name: str):
         with get_connection(PATH) as conn:

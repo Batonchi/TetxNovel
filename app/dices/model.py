@@ -3,6 +3,7 @@ from formation import format_description
 # В файле описаны модели таблиц из БД которые получаются и отправляются по запросу
 
 
+# класс отвечающий за игральную кость
 class Dice:
 
     def __init__(self, name_of_dice, num_of_faces: int, description: str, faces: str, dice_id: int = None):
@@ -13,14 +14,17 @@ class Dice:
         self.description = description
         self.faces = faces
 
+    # буквально функция броска игральной кости
     def cast_dice(self):
         face = choice(self.faces)
         return Face(face.id, face.face_name, format_description(face.description))
 
+    # красивый вывод
     def __str__(self):
         return self.description
 
 
+# Класс стороны игральной кости(поверхности кости)
 class Face:
 
     def __init__(self, face_name: str, description: str, face_id: int = None):
@@ -29,9 +33,11 @@ class Face:
         self.face_name = face_name
         self.description = description
 
+    # вывод класса
     def __str__(self):
         return self.description
 
+    # максимально рандомная хрень))).Нужна для боевки
     def face_affect(self, creature):
         desc = format_description(self.description)
         prob = desc['reverse_action']

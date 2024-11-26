@@ -1,4 +1,3 @@
-import constant
 import sqlite3
 from constant import *
 
@@ -7,9 +6,8 @@ def get_connection(name):  # подключение к БД
     con = sqlite3.connect(name)
     return con
 
+
 # фунция иницилизации БД
-
-
 def create_database():
     with get_connection('novel.db') as conn:
         conn.cursor().execute('''
@@ -18,7 +16,7 @@ def create_database():
                     hero_name VARCHAR(255) NOT NULL,
                     history text DEFAULT NULL,
                     friendly_degree INTEGER DEFAULT 0,
-                    items text[] NOT NULL,
+                    items text[] DEFAULT NULL,
                     xp INTEGER DEFAULT 1000,
                     atk INTEGER DEFAULT 20
                 );
@@ -89,3 +87,4 @@ def create_database():
                     player_puppet text[]
                     );
                 ''')
+        conn.commit()

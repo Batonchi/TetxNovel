@@ -11,6 +11,7 @@ from app.dices.service import FaceService, Face, DiceService, Dice
 from PyQt6.QtWidgets import (QPushButton, QTextEdit, QLabel, QMainWindow, QApplication, QDialog,
                              QFileDialog, QVBoxLayout)
 from PyQt6.QtGui import QPixmap
+from random import choices
 
 
 # функция обрабатывает текст и заполняет таблицы по данным из текта
@@ -75,6 +76,9 @@ class CreateInsertDBDAta(QMainWindow):
         self.minus_btn = QPushButton('-', self)
         self.minus_btn.resize(50, 50)
         self.minus_btn.move(1090, 330)
+        self.save_text_field = QPushButton('Сохранить в файл.txt', self)
+        self.save_text_field.resize(150, 50)
+        self.save_text_field.move(1150, 330)
         self.tables = {
             'answer_texts.png': QPushButton('answer_texts table', self),
             'texts.png': QPushButton('texts table', self),
@@ -100,6 +104,7 @@ class CreateInsertDBDAta(QMainWindow):
         self.send_insert_btn.clicked.connect(self.send_insert)
         self.import_text_document_btn.clicked.connect(self.import_file)
         self.instruction.clicked.connect(self.instruct)
+        self.save_text_field.clicked.connect(self.save_in_txt_file)
 
     # функция для вывода диаграмм БД таблиц
     def view_image(self):
@@ -126,6 +131,9 @@ class CreateInsertDBDAta(QMainWindow):
     def send_insert(self):
         try:
             update_info(self.text_browser.toPlainText())
+            custom_ok = CustomOKDialog()
+            custom_ok.exec()
+
         except Exception as e:
 
             # класс диалогового окна использую так потому что мне кажется, что  оно нигде не пригодиться
@@ -163,25 +171,38 @@ class CreateInsertDBDAta(QMainWindow):
                                      в SQL запрос следуйте ситнаксису:
                                      Table name_of_table_where_insert: (column_1, column_2, ... column_n)
                                     Также для простоты заполнения структура таблиц дроступна 
-                                    по нажатию кнопки соответсвующего имени...Простите за грамотность, мы не на уроке русского!
-                                    Special for Obradovich - здесь доступна функция по увеличеванию размера шрифта поля)))).
+                                    по нажатию кнопки соответсвующего имени...Простите за грамотность, мы не на уроке 
+                                    русского!
+                                    Special for Obradovich - здесь доступна функция по увеличеванию размера шрифта поля
+                                    )))).
                                     С уважением разпработчик.
                                     Также стоит упомянуть что есть такие переменные как листы, к ним относяться:
-                                                ---maybe_items/items/description -> почти вся странно названая хрень с текст типом,
-                                                поясню, там где нет в названиии id, name, но есть упомянание другой таблицы, 
-                                                либо множественнрое число.Перчесиление в них через ';' - точку с запятой;
-                                    Также встречаеться переменные, которые требуют для заполнения текстом с пугктацией, знак ', ' - строго зарезервирован!!!!!
+                                                ---maybe_items/items/description -> почти вся странно названая хрень с 
+                                                текст типом,
+                                                поясню, там где нет в названиии id, name, но есть упомянание другой 
+                                                таблицы, 
+                                                либо множественнрое число.Перчесиление в них через ';' - точку 
+                                                с запятой;
+                                    Также встречаеться переменные, которые требуют для заполнения текстом с пугктацией,
+                                    знак ', ' - строго зарезервирован!!!!!
                                     Хотите поставить запятую ставьте ',/' или сразу пишите текст
                                     Примеры моего заполнения:
                                             Table items: (Зачарованная херня,  5|xp;1|atk;5|mul;0.9|rev;1|drop;Для чего?
-                                             Не знаю, скажу честно врагу будет не приятно, а тебе больно. Тебе смешно?
+                                             Не знаю, скажу честно врагу будет не приятно,\\ а тебе больно. Тебе смешно?
                                               -Да это же просто зачарованная херня!,  странный предмет)
-                                            Table items: (Честный меч , 5|xp;0|atk;10|mul;0.5|rev;7|en;Меч бесчестия с честью врученный вам,  странный предмет)
-                                            Table items: (Меч Паллада Тьмы, 10|atk;0.3|rev;15|en;Просто темный меч, оружие)
-                                            Table items: (Еда богов, 10|xp;0.1|rev;2|en;Небесное наслаждение в одном укусе…Одним разом не ограничишься, еда)
-                                            Table items: (Вкусный попкорн, 1|xp;1|en;0.3|rev;Полученный посредством убийства детских мечт попкорн… Он до сих пор вызывает сомнения у пробующих его…Точно ли это попкорн?, еда)
+                                            Table items: (Честный меч , 5|xp;0|atk;10|mul;0.5|rev;7|en;Меч бесчестия с 
+                                            честью врученный вам,  странный предмет)
+                                            Table items: (Меч Паллада Тьмы, 10|atk;0.3|rev;15|en;Просто темный меч,
+                                             оружие)
+                                            Table items: (Еда богов, 10|xp;0.1|rev;2|en;Небесное наслаждение в одном 
+                                            укусе…Одним разом не ограничишься, еда)
+                                            Table items: (Вкусный попкорн, 1|xp;1|en;0.3|rev;Полученный посредством 
+                                            убийства детских мечт попкорн… Он до сих пор вызывает сомнения у пробующих 
+                                            его…Точно ли это попкорн?, еда)
                                     КОЛИЧЕСТВО АРГУМЕНТОВ СТАТИЧНО И СООТВЕТСВУЕТ ТАБЛИЦАМ ПРЕДСТАВЛЕННЫМ!
                                     Стоит упомянуть, любой запрос без 'энтера' просто в линию.
+                                    стурктуру зависимостей см. start-data.txt.Там показано, что нужно, чтобы в
+                                     дальнейшем поддерживать весь процесс
                                     ''')
                 layout.addWidget(instruction)
                 self.setLayout(layout)
@@ -206,6 +227,30 @@ class CreateInsertDBDAta(QMainWindow):
         font_size = style[0].split()[1].replace('px', '')
         if int(self.min_font_size) != int(font_size):
             self.text_browser.setStyleSheet(f'font-size: {int(font_size) - 1}px' + '; ' + '; '.join(style[1:]))
+
+    # функция сохраняющая в файл формата .txt все из текстового поля
+    def save_in_txt_file(self):
+        try:
+            name_of_file = ''.join(choices([chr(i) for i in range(97, 123)], k=10))
+            with open(f'app\\textFiles\\{name_of_file}.txt', 'w') as f:
+                f.write(self.text_browser.toPlainText())
+            custom_ok = CustomOKDialog()
+            custom_ok.exec()
+        except Exception as e:
+            print(e)
+
+
+# кастомный диалог пока что здесь, как затычка до лучших времен.
+class CustomOKDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('Операция успешна')
+
+        ok_status = QLabel(f'Ваш запрос обработан, Поздравляю!')
+        layout = QVBoxLayout()
+        layout.addWidget(ok_status)
+        self.setLayout(layout)
+
 
 
 if __name__ == '__main__':

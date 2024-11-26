@@ -1,15 +1,16 @@
 # модели для работы с данными из БД
-
+# класс объект получаемый из одноименной таблицы БД
 class Region:
 
-    def __init__(self, region_name:str, hero_placed: str, maybe_items: str, region_id: int = None):
+    def __init__(self, region_name:str, heroes_placed: str, maybe_items: str = None, region_id: int = None):
         self.region_name = region_name
-        self.hero_placed = hero_placed
+        self.heroes_placed = heroes_placed
         self.maybe_items = maybe_items
         if region_id:
             self.region_id = region_id
 
 
+# класс объект получаемый из одноименной таблицы БД
 class Session:
 
     def __init__(self, player_id: int, checkpoint: int, player_puppet: int, game_session_id: int = None):

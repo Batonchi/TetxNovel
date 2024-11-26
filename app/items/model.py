@@ -3,6 +3,7 @@ from app.dices.model import *
 # В файле описаны модели таблиц из БД которые получаются и отправляются по запросу
 
 
+# Класс обертки получаемый из Бд
 class Item:
 
     def __init__(self, item_name: str, description: str, type_of_item: str, item_id: int = None):
@@ -21,6 +22,7 @@ class Weapon(Item):
         self.description = format_description(description)
         self.status = 'Not NULL'
 
+    # класс для осуществления действия класса
     def do_action_move(self):
         self.description['endurance'] -= 1
         if self.description['endurance'] == 0:
@@ -41,6 +43,7 @@ class Stranger(Item):
         self.description = format_description(description)
         self.status = 'Not NULL'
 
+    # класс для осуществления действия класса
     def do_action_move(self):
         self.description['endurance'] -= 1
         if self.description['endurance'] == 0:
@@ -63,6 +66,7 @@ class Food(Item):
         self.description =format_description(description)
         self.status = 'Not NULL'
 
+    # класс для осуществления действия класса
     def do_action_move(self):
         mul = self.description.get('mul', 1)
         xp = self.description.get('heal', 3)

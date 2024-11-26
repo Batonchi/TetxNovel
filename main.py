@@ -1,18 +1,31 @@
 import os
+import sqlite3
 import sys
 
 
+from insert_data_into_DB import *
 from PyQt6.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QLineEdit, QTextBrowser
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from database import create_database
-from app.gameSession.service import SessionService
-from app.players.service import Player, PlayerService
-from app.gameSession.model import Session
-from app.heroes.service import ExistCreature, ExistCreatureService
-from insert_data_into_DB import *
+from database import create_database, get_connection
+from app.gameSession.service import SessionService, Session
+from app.players.service import PlayerService, Player
+from app.heroes.service import ExistCreatureService
+from insert_data_into_DB import update_info
+from constant import PATH
+
 
 create_database()
-# update_info('/textFiles/Table items.docx')
+try:
+    with get_connection(PATH) as conn:
+        if conn.cursor().execute('''SELECT * FROM items WHERE id = 1''').fetchone() is None:
+            raise Exception('hernya')
+except Exception as error:
+    print(error)
+    try:
+        data = open(os.path.join(os.getcwd(), 'app\\textFiles\\start-data.txt'), 'r', encoding='utf-8')
+        update_info(data.read())
+    except Exception as er:
+        print(er)
 
 
 # страница основного игрового процесса
@@ -68,33 +81,40 @@ class StartPage(QMainWindow):
     def start_session(self):
         try:
             player_name = self.player_name.text()
-            player_id = PlayerService.get_player_by_name(player_name)
-            print(player_name, player_id)
-            session = SessionService.get_session_by_player_id(player_id[0])
-            self.return_page = Preview(session[0])
-            self.return_page.show()
+            player = PlayerService.get_player_by_name(player_name)
+            session = SessionService.get_session_by_player_id(player.player_id)
+            if int(session.checkpoint) >= 10:
+                # здесь будет бросать в основное окно Main Window, когда я его
+                # сделаю, пока что только диалоговое окно о прохождении
+                class CustomEndDialog(QDialog):
+                    def __init__(self):
+                        super().__init__()
+                        self.setWindowTitle('Поздравляю!')
+
+                        message = QLabel(f'''ПРиятно видеть человека прошедшего вводную часть моей игры! Спасибо.
+                        На данный момент это конец, но скоро здесь появитья продолжение.''')
+                        layout = QVBoxLayout()
+                        layout.addWidget(message)
+                        self.setLayout(layout)
+
+                custom_end_dialog = CustomEndDialog()
+                custom_end_dialog.exec()
+            else:
+                self.return_page = Preview(session.game_session_id)
+                self.return_page.show()
         except Exception as e:
             print(e)
             try:
                 player_name = self.player_name.text()
-                last_id = PlayerService.get_last_player_id()
-                print(2)
-                if not (last_id is None):
-                    print('hi')
-                    last_id = int(last_id[0]) + 1
-                    PlayerService.register_player(Player(last_id,
-                                                         player_name, 0, ''))
-                else:
-                    PlayerService.register_player(Player(1,
-                                                         player_name, 0, ''))
-                    last_id = 1
+                if PlayerService.get_player_by_name(player_name) is None:
+                    PlayerService.register_player(Player(player_name, 0, ''))
+                player = PlayerService.get_player_by_name(player_name)
                 hero = ExistCreatureService.get_first_creature()
-                print('hi')
-                print(hero)
-                hero = ExistCreature(hero[0], hero[1], hero[2], hero[3], hero[4], hero[5], hero[6])
                 SessionService.set_session(
-                    Session(SessionService.get_last_session_id(), last_id, 1, str(hero)))
-
+                    Session(player.player_id, 1, str(hero)))
+                session = SessionService.get_session_by_player_id(player.player_id)
+                self.return_page = Preview(session.game_session_id)
+                self.return_page.show()
             except Exception as e:
                 print(e)
 
@@ -110,10 +130,10 @@ class StartPage(QMainWindow):
 class Preview(QMainWindow):
     def __init__(self, id_of_session: int):
         super().__init__()
-        self.initUI()
-        self.id_session = id_of_session
+        self.initUI(id_of_session)
+        self.id_of_session = id_of_session
 
-    def initUI(self):
+    def initUI(self, id_of_session):
         self.setWindowTitle('Boundless Abyss Adventure')
 
         self.view = QWebEngineView()
@@ -130,28 +150,70 @@ class Preview(QMainWindow):
         self.dialog.setStyleSheet('background-color: #6B3030;')
         self.dialog.move(1325, 10)
         self.dialog.resize(600, 200)
+        self.dialog_name_region_text_browser = QTextBrowser(self)
+        self.dialog_name_region_text_browser.move(1325, 220)
+        self.dialog_name_region_text_browser.resize(600, 70)
+        self.dialog_name_region_text_browser.setStyleSheet('background-color: rgb(100, 0, 0); border-radius: 10px;'
+                                                           ' color: rgb(255, 255, 255); padding: 15px; font-size: 30px;')
         self.dialog_text_browser = QTextBrowser(self)
         (self.dialog_text_browser
          .setStyleSheet('background-color: #6B3030; font-size: 30px;'
-                        ' padding: 15px; color: #000000; border-radius: 10px'))
-        self.dialog_text_browser.move(1325, 230)
-        self.dialog_text_browser.setFixedSize(600, 700)
-        self.user_text_browser = QTextBrowser(self)
-        (self.user_text_browser
-         .setStyleSheet('background-color: #6B3030; font-size: 22px; padding: 15x; border-radius: 10px'))
-        self.user_text_browser.setFixedSize(600, 100)
-        self.user_text_browser.move(1325, 950)
-        self.dialog.clicked.connect(self.scroll_down)
+                        'padding: 15px; color: #ffffff; border-radius: 10px'))
+        self.dialog_text_browser.move(1325, 300)
+        self.dialog_text_browser.setFixedSize(600, 750)
+        self.dialog.clicked.connect(self.scroll_down_history)
+        self.dialog_stack = []
 
     # более приятный и отслеживаемый процесс загрузки страницы HTML
     def load_page(self):
-        path = os.path.abspath('app\\static\\preview.png.html')
+        path = os.path.abspath('app\\static\\preview.html')
         with open(path, 'r') as f:
             self.view.setHtml(f.read())
 
-    def scroll_down(self):
+    # функция, которая делает видимость стэка из диалогов см. структуру функции
+    # изначально если нет dialog_stack то его создают, а потом воспроизводят.
+    def scroll_down_history(self):
+        if not self.dialog_stack:
+            try:
+                # НЕ пытайтесь поянть это...
+                # Могу сказать одно что здесь используются различные махинации с БД с помрощью фуннкций из сервисов
+                session = SessionService.get_session_by_id(self.id_of_session)
+                checkpoint = session.checkpoint
+                region = RegionService.get_region_by_id(checkpoint)
+                heroes_placed = region.heroes_placed
+                heroes = [ExistCreatureService.get_creature_by_name(name) for name in heroes_placed.split(';')]
+                for hero in heroes:
+                    texts = TextService.get_texts_by_region_id_and_hero_name(region.region_id, hero.hero_name)
+                    for text in texts:
+                        self.dialog_stack.append((hero, text, region.region_name))
+                self.scroll_down_history()
+            except TypeError as e:
+                if str(e) == "'NoneType' object is not subscriptable":
+                    self.return_page = EndPage()
+                    self.return_page.show()
+                    self.close()
+            except Exception as e:
+                print(e)
+        else:
+            try:
+                pop_text_list = self.dialog_stack.pop(0)
+                self.dialog_name_region_text_browser.setText(pop_text_list[2])
+                text = pop_text_list[1].content
+                res_text = ''
+                for substr in text:
+                    if substr == '\\':
+                        continue
+                    res_text += substr
+                self.dialog_text_browser.setText(f'''{pop_text_list[0].hero_name}: \n
+                {res_text}''')
+                if not self.dialog_stack:
+                    session = SessionService.get_session_by_id(self.id_of_session)
+                    SessionService.update_checkpoint(session.checkpoint, self.id_of_session)
+            except Exception as e:
+                print(e)
+
         self.view.page().runJavaScript('''
-            window.scrollBy(0, 100)
+            window.scrollBy(0, 200)
                 ''')
 
 
@@ -191,9 +253,9 @@ class EndPage(QMainWindow):
     # функция возврата к STARTPAGE
     def return_lobby(self):
         try:
-            return_page = StartPage()
-            self.return_page = return_page
+            self.return_page = StartPage()
             self.return_page.show()
+            self.close()
         except Exception as e:
             print(e)
 

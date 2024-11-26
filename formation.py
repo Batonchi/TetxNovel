@@ -27,6 +27,7 @@ deforms = {
 }
 
 
+# функция премущественно для параметра description из таблицыы и также всех элю таблиц БД, где после текст стоит []
 def format_description(description: str):
     description = description.split(';')
     res_dict = {}
@@ -40,6 +41,7 @@ def format_description(description: str):
     return res_dict
 
 
+# функция обратная, представленно выше
 def deform_description(description: dict):
     res_str = []
     for k, v in description.items():
